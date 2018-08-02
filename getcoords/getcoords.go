@@ -2,17 +2,16 @@ package getcoords
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
 type response struct {
-	Lat  float32
-	Long float32
+	Lat  float32 `json:"lat"`
+	Long float32 `json:"long"`
 }
 
 type GoogleResponse struct {
-	Results []Result
+	Results []Result `json:"results"`
 }
 
 type Result struct {
@@ -47,10 +46,8 @@ func GetLocation(w http.ResponseWriter, r *http.Request) {
 	GoogleReq.URL.RawQuery = q.Encode()
 
 	client := http.Client{}
-	fmt.Println(GoogleReq)
 	resp, getErr := client.Do(GoogleReq)
 	if getErr != nil {
-		fmt.Println("get")
 		http.Error(w, getErr.Error(), 500)
 		return
 	}
@@ -61,12 +58,10 @@ func GetLocation(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, reqErr.Error(), 500)
 		return
 	}
-	fmt.Println(reqRes.Results[0].Geometry.Location.Lat)
 
 	res := response{Lat: reqRes.Results[0].Geometry.Location.Lat, Long: reqRes.Results[0].Geometry.Location.Lng}
 	respErr := json.NewEncoder(w).Encode(res)
 	if respErr != nil {
-		fmt.Println("res")
 		http.Error(w, respErr.Error(), 500)
 		return
 	}
