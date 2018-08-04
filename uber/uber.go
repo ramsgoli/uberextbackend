@@ -7,11 +7,6 @@ import (
 	"fmt"
 )
 
-type request struct {
-	Lat float32 `json:"lat"`
-	Long float32 `json:"long"`
-}
-
 type UberResponseResult struct {
 	DisplayName string `json:"localized_display_name"`
 	Distance float32 `json:"distance"`
@@ -35,7 +30,6 @@ func GetUberEstimate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	UberReq, getError := http.NewRequest("GET", "https://api.uber.com/v1.2/estimates/price", nil)
 	res := ClientResponse{}
 	if getError != nil {
@@ -46,15 +40,16 @@ func GetUberEstimate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	query := UberReq.URL.Query()
+	query.Add("start_latitude", clientReq.Get("start_latitude"))
+	query.Add("start_longitude", clientReq.Get("start_longitude"))
 	query.Add("end_latitude", clientReq.Get("end_latitude"))
 	query.Add("end_longitude", clientReq.Get("end_longitude"))
 	UberReq.URL.RawQuery = query.Encode()
 
 	// Set header
 	var buffer bytes.Buffer
-	buffer.WriteString("Bearer ")
+	buffer.WriteString("Token ")
 	buffer.WriteString("vSzuZLd5Hxgs6RfSxD36n7ZHr0oHnP7euXbfb6g0")
-	fmt.Println(buffer.String())
 	UberReq.Header.Set("Authorization", buffer.String())
 
 	client := http.Client{}
