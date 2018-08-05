@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"bytes"
-	"fmt"
+	"github.com/ramsgoli/uberextbackend/keys"
 )
 
 type UberResponseResult struct {
@@ -18,7 +18,7 @@ type ClientResponse struct {
     Prices []UberResponseResult `json:"prices"`
 }
 
-func GetUberEstimate(w http.ResponseWriter, r *http.Request) {
+func GetUberEstimate(w http.ResponseWriter, r *http.Request, keys *keys.Keys) {
 	if r.URL == nil {
 		http.Error(w, "Please provide destination coordinates", 400)
 		return
@@ -30,7 +30,7 @@ func GetUberEstimate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	UberReq, getError := http.NewRequest("GET", "https://api.uber.com/v1.2/estimates/price", nil)
+	uberReq, getError := http.NewRequest("GET", "https://api.uber.com/v1.2/estimates/price", nil)
 	res := ClientResponse{}
 	if getError != nil {
 		res.Message = "Can not get an estimate right now"
@@ -39,21 +39,21 @@ func GetUberEstimate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := UberReq.URL.Query()
+	query := uberReq.URL.Query()
 	query.Add("start_latitude", clientReq.Get("start_latitude"))
 	query.Add("start_longitude", clientReq.Get("start_longitude"))
 	query.Add("end_latitude", clientReq.Get("end_latitude"))
 	query.Add("end_longitude", clientReq.Get("end_longitude"))
-	UberReq.URL.RawQuery = query.Encode()
+	uberReq.URL.RawQuery = query.Encode()
 
 	// Set header
 	var buffer bytes.Buffer
 	buffer.WriteString("Token ")
 	buffer.WriteString("vSzuZLd5Hxgs6RfSxD36n7ZHr0oHnP7euXbfb6g0")
-	UberReq.Header.Set("Authorization", buffer.String())
+	uberReq.Header.Set("Authorization", buffer.String())
 
 	client := http.Client{}
-	uberResp, uberGetError := client.Do(UberReq)
+	uberResp, uberGetError := client.Do(uberReq)
 	if uberGetError != nil {
 		res.Message = "Can not get an estimate right now"
 		w.WriteHeader(http.StatusInternalServerError)
