@@ -3,7 +3,6 @@ package getcoords
 import (
 	"encoding/json"
 	"net/http"
-	"github.com/ramsgoli/uberextbackend/keys"
 )
 
 type googleResponse struct {
@@ -24,7 +23,7 @@ type Result struct {
 	} `json:"geometry"`
 }
 
-func GetLocation(w http.ResponseWriter, r *http.Request, keys *keys.Keys) {
+func GetLocation(w http.ResponseWriter, r *http.Request) {
 	if r.URL == nil {
 		http.Error(w, "Please provide a request body", 400)
 		return
@@ -43,7 +42,6 @@ func GetLocation(w http.ResponseWriter, r *http.Request, keys *keys.Keys) {
 	}
 	q := googleReq.URL.Query()
 	q.Add("address", clientReq.Get("address"))
-	q.Add("key", "")
 	googleReq.URL.RawQuery = q.Encode()
 
 	client := http.Client{}

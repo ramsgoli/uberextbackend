@@ -21,5 +21,7 @@ FROM alpine
 RUN apk --no-cache add ca-certificates
 WORKDIR /root
 COPY --from=builder /go/src/github.com/ramsgoli/uberextbackend/uberextbackend .
+COPY --from=builder /go/src/github.com/ramsgoli/uberextbackend/.env .
+
 
 CMD ["./uberextbackend"]

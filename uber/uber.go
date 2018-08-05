@@ -49,7 +49,7 @@ func GetUberEstimate(w http.ResponseWriter, r *http.Request, keys *keys.Keys) {
 	// Set header
 	var buffer bytes.Buffer
 	buffer.WriteString("Token ")
-	buffer.WriteString("vSzuZLd5Hxgs6RfSxD36n7ZHr0oHnP7euXbfb6g0")
+	buffer.WriteString(keys.UberKey)
 	uberReq.Header.Set("Authorization", buffer.String())
 
 	client := http.Client{}
