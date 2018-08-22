@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"bytes"
+	"strconv"
 	"github.com/ramsgoli/uberextbackend/keys"
+	"github.com/ramsgoli/uberextbackend/getcoords"
 )
 
 type UberResponseResult struct {
@@ -18,6 +20,10 @@ type ClientResponse struct {
     Prices []UberResponseResult `json:"prices"`
 }
 
+func floatToString(f float64) (string) {
+	return strconv.FormatFloat(f, 'f', -1, 64)
+}
+
 func GetUberEstimate(w http.ResponseWriter, r *http.Request, keys *keys.Keys) {
 	if r.URL == nil {
 		http.Error(w, "Please provide destination coordinates", 400)
@@ -25,8 +31,14 @@ func GetUberEstimate(w http.ResponseWriter, r *http.Request, keys *keys.Keys) {
 	}
 
 	clientReq := r.URL.Query()
-	if clientReq["end_latitude"] == nil || clientReq["end_longitude"] == nil {
-		http.Error(w, "Please provide end_latitude and end_longitude", 400)
+	if clientReq["start_latitude"] == nil || clientReq["start_longitude"] == nil || clientReq["address"] == nil {
+		http.Error(w, "Please provide start_latitude, start_longitude, and address", 400)
+		return
+	}
+
+	getCoordsErr, coordinates := getcoords.GetLocation(clientReq.Get("address"))
+	if getCoordsErr != nil {
+		http.Error(w, "Could not fetch the coordinates of the address provided", 400)
 		return
 	}
 
@@ -42,8 +54,8 @@ func GetUberEstimate(w http.ResponseWriter, r *http.Request, keys *keys.Keys) {
 	query := uberReq.URL.Query()
 	query.Add("start_latitude", clientReq.Get("start_latitude"))
 	query.Add("start_longitude", clientReq.Get("start_longitude"))
-	query.Add("end_latitude", clientReq.Get("end_latitude"))
-	query.Add("end_longitude", clientReq.Get("end_longitude"))
+	query.Add("end_latitude", floatToString(coordinates.Results[0].Geometry.Location.Lat))
+	query.Add("end_longitude", floatToString(coordinates.Results[0].Geometry.Location.Lng))
 	uberReq.URL.RawQuery = query.Encode()
 
 	// Set header
