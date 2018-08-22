@@ -24,4 +24,4 @@ COPY --from=builder /go/src/github.com/ramsgoli/uberextbackend/uberextbackend .
 COPY --from=builder /go/src/github.com/ramsgoli/uberextbackend/.env .
 
 
-CMD ["./uberextbackend"]
+CMD ["PORT=8000", "./uberextbackend"]
